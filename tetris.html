@@ -1,0 +1,150 @@
+<!doctype html>
+<html>
+<head>
+  <title>Tetris CANVAS</title>
+  <style type="text/css">
+    body {
+      background: #333;
+    }
+    .canvas {
+      position: fixed;
+    }
+  </style>
+</head>
+<body>
+
+<script>
+  var SQUARE_SIZE = 32;
+  var SQUARE_PADDING = 1;
+  var BOTTOM = 10;
+
+  var canvas;
+  var context;
+  var piecesMap = [
+    [
+      [0, 1, 0],
+      [0, 1, 0],
+      [0, 1, 1],
+    ],
+    [
+      [1, 1],
+      [1, 1]
+    ],
+    [
+      [0, 1, 0],
+      [0, 1, 0],
+      [1, 1, 0],
+    ],
+    [
+      [1, 1, 1],
+      [0, 1, 0],
+      [0, 0, 0],
+    ],
+  ];
+  var piece = {
+    data: null,
+    x: 0,
+    y: 0
+  };
+  var state = {
+    interval: 500
+  };
+  var keyMap = [];
+
+  function drawSquare(x, y, color) {
+    var ax = x * SQUARE_SIZE + SQUARE_PADDING;
+    var ay = y * SQUARE_SIZE + SQUARE_PADDING;
+    var w = h = SQUARE_SIZE - (SQUARE_PADDING * 2);
+
+    context.fillStyle = color;
+    context.fillRect(ax, ay, w, h);
+  }
+
+  function drawFigure(x, y, piece, color) {
+    for (var yy = 0; yy < piece.length; yy++) {
+      for (var xx = 0; xx < piece[yy].length; xx++ ) {
+        if (piece[yy][xx]) {
+          drawSquare(x + xx, y + yy, color);
+        }
+      }
+    }
+  }
+
+  function randomPiece() {
+    var index = parseInt(
+      Math.round(
+        Math.random() * piecesMap.length - 1
+      )
+    );
+    return piecesMap[index];
+  }
+
+  function squareDemo() {
+    drawFigure(4, 4, randomPiece(), "white")
+  }
+
+  function globalDraw() {
+    context.clearRect(0, 0, canvas.width, canvas.height)
+    drawFigure(piece.x, piece.y, piece.data, "white");
+  }
+
+  function tick() {
+    if (piece.y < BOTTOM) {
+      piece.y += 1;
+    }
+    globalDraw();
+    setTimeout(tick, state.interval);
+  }
+
+  window.onresize = function() {
+    this.canvas.width = this.innerWidth;
+    this.canvas.height = this.innerHeight;
+  };
+
+  window.onkeydown = function(e) {
+    if (e.keyCode === 68) {
+      if (piece.x < 10 && piece.y < BOTTOM) {
+        piece.x += 1;
+        globalDraw();
+      }
+    } else if (e.keyCode === 65 && piece.y < BOTTOM) {
+      if (piece.x > 0) {
+        piece.x -= 1;
+        globalDraw();
+      }
+    } else if (e.keyCode === 83) {
+      if (piece.y < BOTTOM) {
+        piece.y = BOTTOM;
+        globalDraw();
+      }
+    }
+    console.log(e.keyCode);
+    // keyMap[e.keyCode] = true;
+  };
+
+  window.onkeyup = function(e) {
+    //keyMap[e.keyCode] = false;
+  }
+
+  window.onload = function() {
+    piece.data = randomPiece();
+    // piece.y = piecesMap[piece.index].height / 2;
+    piece.y = 0;
+    piece.x = 0;
+
+    canvas = document.createElement('canvas');
+    canvas.className = 'canvas';
+    context = canvas.getContext('2d');
+    document.body.appendChild(canvas);
+    this.onresize();
+
+    for (var index = 0; index < 256; index++) {
+      keyMap.push(false);
+    }
+
+    setTimeout(tick, 0);
+    // squareDemo();
+  };
+</script>
+</body>
+</html>
